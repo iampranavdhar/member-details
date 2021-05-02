@@ -1,0 +1,30 @@
+.nav{
+    background-color: black;
+    height: 55px;
+    margin: auto;
+    border-radius: 2px;
+    display: flex;
+    color:  rgb(255, 145, 0);
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 20px;
+}
+
+.contact_nav{
+    margin-right: 15px;
+    color:white;
+    font-weight: 900;
+    background-color: #ef476f;
+    padding: 05px;
+    border-radius: 15px;
+}
+
+.contact_nav:link{
+    text-decoration: none;
+}
+
+.contact_nav:hover{
+    background-color: white;
+    color: #ef476f;
+}

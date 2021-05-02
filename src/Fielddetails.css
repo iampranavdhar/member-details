@@ -1,0 +1,25 @@
+.members{
+    display: flex;
+    flex-wrap: wrap;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.members::-webkit-scrollbar{
+    display: none;
+}
+
+/* @media screen and (min-width: 485px){
+    .members{
+        flex-direction: row;
+    }
+} */
+
+
+.searchbar_members{
+    padding: 15px;
+    border-radius: 15px;
+    margin: 20px;
+}

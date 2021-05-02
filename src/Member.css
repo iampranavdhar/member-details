@@ -1,0 +1,38 @@
+.member{
+    margin: 10px;
+    width: 100%;
+    min-width: 250px;
+    max-width: 250px;
+    height: auto;
+    border: 2px solid rgb(68, 233, 145);
+    border-radius: 13px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-align: center;
+  }
+
+.member:hover{
+    box-shadow: 10px 28px 16px 0 rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+
+hr{
+    width: 100%;
+}
+
+.member_image{
+    border-radius: 50%;
+    height: 70px;
+    width: 70px;
+}
+
+.member_name{
+    text-align: center;
+}
+
+p{
+    margin: 10px;
+    text-align: left;
+}
