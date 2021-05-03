@@ -49,7 +49,7 @@ function Fielddetails() {
 
         {/*Here we have to get the members so we are writing like data.data.categoryById.members */}
          
-        fetch('http://127.0.0.1:8000/graphql', sendingPost)
+        fetch('https://member-details-backend.herokuapp.com/graphql', sendingPost)
             .then(response => response.json())
             .then(data => setData(data.data.categoryById.members));
     },[])
