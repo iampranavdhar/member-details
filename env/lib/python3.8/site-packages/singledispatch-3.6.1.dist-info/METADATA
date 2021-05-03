@@ -1,0 +1,203 @@
+Metadata-Version: 2.1
+Name: singledispatch
+Version: 3.6.1
+Summary: Backport functools.singledispatch from Python 3.4 to Python 2.6-3.3.
+Home-page: https://github.com/jaraco/singledispatch
+Author: Jason R. Coombs
+Author-email: jaraco@jaraco.com
+License: UNKNOWN
+Keywords: single,dispatch,generic,functions,singledispatch,genericfunctions,decorator,backport
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=2.6
+Requires-Dist: six
+Requires-Dist: ordereddict ; python_version < "2.7"
+Provides-Extra: docs
+Requires-Dist: sphinx ; extra == 'docs'
+Requires-Dist: jaraco.packaging (>=8.2) ; extra == 'docs'
+Requires-Dist: rst.linker (>=1.9) ; extra == 'docs'
+Provides-Extra: testing
+Requires-Dist: pytest (>=4.6) ; extra == 'testing'
+Requires-Dist: pytest-checkdocs (>=1.2.3) ; extra == 'testing'
+Requires-Dist: pytest-flake8 ; extra == 'testing'
+Requires-Dist: pytest-cov ; extra == 'testing'
+Requires-Dist: pytest-black (>=0.3.7) ; (platform_python_implementation != "PyPy") and extra == 'testing'
+Requires-Dist: unittest2 ; (python_version < "2.7") and extra == 'testing'
+
+.. image:: https://img.shields.io/pypi/v/singledispatch.svg
+   :target: `PyPI link`_
+
+.. image:: https://img.shields.io/pypi/pyversions/singledispatch.svg
+   :target: `PyPI link`_
+
+.. _PyPI link: https://pypi.org/project/singledispatch
+
+.. image:: https://github.com/jaraco/singledispatch/workflows/tests/badge.svg
+   :target: https://github.com/jaraco/singledispatch/actions?query=workflow%3A%22tests%22
+   :alt: tests
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+   :alt: Code style: Black
+
+.. .. image:: https://readthedocs.org/projects/skeleton/badge/?version=latest
+..    :target: https://skeleton.readthedocs.io/en/latest/?badge=latest
+
+`PEP 443 <http://www.python.org/dev/peps/pep-0443/>`_ proposed to expose
+a mechanism in the ``functools`` standard library module in Python 3.4
+that provides a simple form of generic programming known as
+single-dispatch generic functions.
+
+This library is a backport of this functionality to Python 2.6 - 3.3.
+
+To define a generic function, decorate it with the ``@singledispatch``
+decorator. Note that the dispatch happens on the type of the first
+argument, create your function accordingly::
+
+  >>> from singledispatch import singledispatch
+  >>> @singledispatch
+  ... def fun(arg, verbose=False):
+  ...     if verbose:
+  ...         print("Let me just say,", end=" ")
+  ...     print(arg)
+
+To add overloaded implementations to the function, use the
+``register()`` attribute of the generic function. It is a decorator,
+taking a type parameter and decorating a function implementing the
+operation for that type::
+
+  >>> @fun.register(int)
+  ... def _(arg, verbose=False):
+  ...     if verbose:
+  ...         print("Strength in numbers, eh?", end=" ")
+  ...     print(arg)
+  ...
+  >>> @fun.register(list)
+  ... def _(arg, verbose=False):
+  ...     if verbose:
+  ...         print("Enumerate this:")
+  ...     for i, elem in enumerate(arg):
+  ...         print(i, elem)
+
+To enable registering lambdas and pre-existing functions, the
+``register()`` attribute can be used in a functional form::
+
+  >>> def nothing(arg, verbose=False):
+  ...     print("Nothing.")
+  ...
+  >>> fun.register(type(None), nothing)
+
+The ``register()`` attribute returns the undecorated function which
+enables decorator stacking, pickling, as well as creating unit tests for
+each variant independently::
+
+  >>> @fun.register(float)
+  ... @fun.register(Decimal)
+  ... def fun_num(arg, verbose=False):
+  ...     if verbose:
+  ...         print("Half of your number:", end=" ")
+  ...     print(arg / 2)
+  ...
+  >>> fun_num is fun
+  False
+
+When called, the generic function dispatches on the type of the first
+argument::
+
+  >>> fun("Hello, world.")
+  Hello, world.
+  >>> fun("test.", verbose=True)
+  Let me just say, test.
+  >>> fun(42, verbose=True)
+  Strength in numbers, eh? 42
+  >>> fun(['spam', 'spam', 'eggs', 'spam'], verbose=True)
+  Enumerate this:
+  0 spam
+  1 spam
+  2 eggs
+  3 spam
+  >>> fun(None)
+  Nothing.
+  >>> fun(1.23)
+  0.615
+
+Where there is no registered implementation for a specific type, its
+method resolution order is used to find a more generic implementation.
+The original function decorated with ``@singledispatch`` is registered
+for the base ``object`` type, which means it is used if no better
+implementation is found.
+
+To check which implementation will the generic function choose for
+a given type, use the ``dispatch()`` attribute::
+
+  >>> fun.dispatch(float)
+  <function fun_num at 0x1035a2840>
+  >>> fun.dispatch(dict)    # note: default implementation
+  <function fun at 0x103fe0000>
+
+To access all registered implementations, use the read-only ``registry``
+attribute::
+
+  >>> fun.registry.keys()
+  dict_keys([<class 'NoneType'>, <class 'int'>, <class 'object'>,
+            <class 'decimal.Decimal'>, <class 'list'>,
+            <class 'float'>])
+  >>> fun.registry[float]
+  <function fun_num at 0x1035a2840>
+  >>> fun.registry[object]
+  <function fun at 0x103fe0000>
+
+The vanilla documentation is available at
+http://docs.python.org/3/library/functools.html#functools.singledispatch.
+
+
+Maintenance
+-----------
+
+This backport is maintained on Github by Jason R. Coombs, one of the
+members of the core CPython team:
+
+* `repository <https://github.com/jaraco/singledispatch>`_
+
+* `issue tracker <https://github.com/jaraco/singledispatch/issues>`_
+
+
+Conversion Process
+------------------
+
+This section is technical and should bother you only if you are
+wondering how this backport is produced. If the implementation details
+of this backport are not important for you, feel free to ignore the
+following content.
+
+``singledispatch`` is converted using `six
+<http://pypi.python.org/pypi/six>`_ so that a single codebase can be
+used for all compatible Python versions.  Because a fully automatic
+conversion was not doable, I took the following branching approach:
+
+* the ``upstream`` branch holds unchanged files synchronized from the
+  upstream CPython repository. The synchronization is currently done by
+  manually copying the required code parts and stating from which
+  CPython changeset they come from. The tests should pass on Python 3.4
+  on this branch.
+
+* the ``default`` branch holds the manually translated version and this
+  is where all tests are run for all supported Python versions using
+  Tox.
+
+
