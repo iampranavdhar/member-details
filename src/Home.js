@@ -21,7 +21,7 @@ function Home() {
             body: '{"query": "{allCategories{id,name,stackImage}}"}'
         };
 
-         fetch('http://127.0.0.1:8000/graphql', sendingPost)
+         fetch('https://member-details-backend.herokuapp.com/graphql', sendingPost)
             .then(response => response.json())
             .then(data => setData(data.data.allCategories));
     },[])
