@@ -46,7 +46,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:8000',
-    'https://member-details-pranav.herokuapp.com'
+    'https://member-details-pranav.herokuapp.com',
+    'member-details-backend.herokuapp.com',
 ]
 
 GRAPHENE = {
